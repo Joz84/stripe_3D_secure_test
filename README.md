@@ -1,11 +1,11 @@
-#How to install new Stripe 3D Secure with Checkout
+# How to install new Stripe 3D Secure with Checkout
 
-##Step 1 - Update Stripe Account with new API & activate checkout
+## Step 1 - Update Stripe Account with new API & activate checkout
 Activate checkout in https://dashboard.stripe.com/account/checkout/settings
 
-##Step 2 - Install gem stripe
+## Step 2 - Install gem stripe
 
-##Step 3 - Install Initializer & Keys
+## Step 3 - Install Initializer & Keys
 ```ruby
 # config/initializers/stripe.rb
 Rails.configuration.stripe = {
@@ -22,7 +22,7 @@ STRIPE_PUBLISHABLE_KEY=pk_**H
 STRIPE_SECRET_KEY=sk_**f
 ```
 
-##Step 4 - In Payment Controller
+## Step 4 - In Payment Controller
 ```ruby
 class PaymentsController < ApplicationController
   before_action :set_order
@@ -59,7 +59,7 @@ end
 
 ```
 
-##Step 5 - Payment Form
+## Step 5 - Payment Form
 ```html
 <h1>Purchase of product <%= @order.product_sku %></h1>
   <article>
@@ -75,7 +75,7 @@ end
 ```
 
 
-##Step 6 - Stripe JS
+## Step 6 - Stripe JS
 ```javascript
 var checkoutButton = document.querySelector('#checkout-button');
 if (checkoutButton) {
@@ -93,7 +93,7 @@ if (checkoutButton) {
 }
 ```
 
-##Step 7 - Order Controller
+## Step 7 - Order Controller
 ```ruby
 class OrdersController < ApplicationController
 
