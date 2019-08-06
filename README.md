@@ -109,3 +109,17 @@ class OrdersController < ApplicationController
   end
 end
 ```
+
+## Additional infos - in case
+
+```
+Custom de la page de demande de détails de la carte - Ajout Logo & Couleur
+https://dashboard.stripe.com/account/branding
+
+Envoi automatique d'un email au paiement d'un utilisateur - Reçu
+https://stripe.com/docs/receipts#receipts-checkout
+
+Activer l'email pour les cartes arrivant à expiration & en cas d'erreur de paiement
+https://dashboard.stripe.com/account/billing/automatic
+
+```
