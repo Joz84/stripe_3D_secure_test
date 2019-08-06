@@ -17,6 +17,7 @@
   gem 'uglifier'
   gem 'webpacker'
   gem 'slim'
+  gem 'money-rails'
 
   group :development do
     gem 'rails-erd'
