@@ -111,7 +111,6 @@ end
 ```
 
 ## Additional infos - in case
-
 ```
 Custom de la page de demande de détails de la carte - Ajout Logo & Couleur
 https://dashboard.stripe.com/account/branding
@@ -122,4 +121,12 @@ https://stripe.com/docs/receipts#receipts-checkout
 Activer l'email pour les cartes arrivant à expiration & en cas d'erreur de paiement
 https://dashboard.stripe.com/account/billing/automatic
 
+```
+
+Docs Stripe associated
+```
+https://stripe.com/docs/api/checkout/sessions/object
+https://stripe.com/docs/payments/checkout/server
+https://stripe.com/docs/stripe-js/elements/quickstart
+https://stripe.com/docs/testing#cards
 ```
