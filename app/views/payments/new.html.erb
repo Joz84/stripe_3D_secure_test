@@ -1,0 +1,16 @@
+<h1>Purchase of product <%= @order.product_sku %></h1>
+<%#= form_tag order_payments_path(@order) do %>
+  <article>
+    <label class="amount">
+      <span>Amount: <%= humanized_money_with_symbol(@order.amount) %></span>
+    </label>
+  </article>
+  <button id="checkout-button"
+          data-sessionid="<%= @session_id %>"
+          data-stripekey="<%= @stripe_publishable_key %>">
+    Pay
+  </button>
+<%# end %>
+
+
+

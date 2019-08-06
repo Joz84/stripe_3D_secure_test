@@ -8,5 +8,11 @@
       <p>Some awesome description of our amazing product.</p>
       <p>Amount: <%= humanized_money_with_symbol(@product.price) %></p>
     </div>
+    <div class="col-sm-12 col-md-6">
+      <%= form_tag orders_path do %>
+        <%= hidden_field_tag 'product_id', @product.id %>
+        <%= submit_tag 'Purchase', class: 'btn btn-primary' %>
+      <% end %>
+    </div>
   </div>
 </div>
