@@ -1,3 +1,8 @@
+function flash(innerHTML) {
+  const flash = document.getElementById('flash');
+  flash.innerHTML = innerHTML;
+};
+
 var checkoutButton = document.querySelector('#checkout-button');
 if (checkoutButton) {
   checkoutButton.addEventListener('click', function (event) {
@@ -5,10 +10,11 @@ if (checkoutButton) {
     stripe.redirectToCheckout({
       sessionId: event.currentTarget.dataset.sessionid
     }).then(function (result) {
-      // If `redirectToCheckout` fails due to a browser or network
-      // error, display the localized error message to your customer
-      // using `result.error.message`.
-      result.error.message
+      if (result.error.message) {
+        // var displayError = document.getElementById('error-message');
+        // displayError.textContent = result.error.message;
+        flash('<%= j render "shared/flashes", alert: "Une erreur s est produite lors du paiement : " + result.error.message %>');
+      }
     });
   });
 }

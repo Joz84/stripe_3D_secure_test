@@ -9,6 +9,9 @@ class PaymentsController < ApplicationController
     #     setup_future_usage: 'off_session',
     # })
     # @order.update(intent_id: @intent.id)
+    # if params[:alert_message]
+      # flash[:alert] = "Une erreur s'est produite lors de votre paiement test"
+    # end
 
     customer = Stripe::Customer.create(
       email:  current_user.email,
@@ -35,6 +38,7 @@ class PaymentsController < ApplicationController
       # },
       success_url: order_url(@order),
       cancel_url: new_order_payment_url(@order),
+      # cancel_url: new_order_payment_url(@order, alert_message: "error message"),
     )
     @stripe_publishable_key = Rails.configuration.stripe[:publishable_key]
     @session_id = stripe_session.id
