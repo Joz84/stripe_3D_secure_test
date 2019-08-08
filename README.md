@@ -22,6 +22,12 @@ STRIPE_PUBLISHABLE_KEY=pk_**H
 STRIPE_SECRET_KEY=sk_**f
 ```
 
+Ajouter dans layout/application.html.erb
+```html
+<script src="https://js.stripe.com/v3/"></script>
+```
+
+
 ## Step 4 - In Payment Controller
 ```ruby
 class PaymentsController < ApplicationController
@@ -108,6 +114,23 @@ class OrdersController < ApplicationController
     flash[:notice] = "Paiement validé avec succés"
   end
 end
+```
+
+## Step 8 - Obtain the error message
+```javascript
+function flash(innerHTML) {
+  const flash = document.getElementById('flash');
+  flash.innerHTML = innerHTML;
+};
+...
+}).then(function (result) {
+  if (result.error.message) {
+    // var displayError = document.getElementById('error-message');
+    // displayError.textContent = result.error.message;
+    flash('<%= j render "shared/flashes", alert: "Une erreur s est produite lors du paiement : " + result.error.message %>');
+  }
+});
+...
 ```
 
 ## Additional infos - in case
