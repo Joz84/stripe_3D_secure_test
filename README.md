@@ -26,63 +26,95 @@ Ajouter dans layout/application.html.erb
 ```html
 <script src="https://js.stripe.com/v3/"></script>
 ```
+## Step 4 - migrations
+```shell
+rails g migration AddStripeSessionIdToOrders stripe_session_id 
+rails g migration AddStripeIdToUsers stripe_id
+```
 
+## Step 5 - routes
+```ruby
+Rails.application.routes.draw do
+  get "order/paid/:id", to: "orders#paid", as: "paid_order"
+  devise_for :users
+  root to: 'teddies#index'
+  # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
 
-## Step 4 - In Payment Controller
+  resources :teddies, only: [:index, :show]
+  resources :orders, only: [:show, :create] do
+    resources :payments, only: [:new]
+  end
+end
+```
+
+## Step 6 - In Payment Controller
 ```ruby
 class PaymentsController < ApplicationController
   before_action :set_order
 
   def new
-    customer = Stripe::Customer.create(
-      email:  current_user.email,
-      name: current_user.email,
-    )
+    if current_user.stripe_id.nil?
+      customer = Stripe::Customer.create(
+        email:  current_user.email,
+        name: current_user.email,
+      )
+      current_user.update(stripe_id: customer.id)
+    end
 
     stripe_session = Stripe::Checkout::Session.create(
-      customer: customer.id,
+      customer: current_user.stripe_id,
       payment_method_types: ['card'],
       locale: 'auto',
       line_items: [{
-        name: @order.product_sku,
-        description: "Payment for teddy #{@order.product_sku} for order #{@order.id}",
+        name: @order.teddy_sku,
+        description: "Payment for teddy #{@order.teddy_sku} for order #{@order.id}",
         amount: @order.amount_cents,
         currency: @order.amount.currency,
         quantity: 1,
       }],
-      success_url: order_url(@order),
+      success_url: paid_order_url(@order),
       cancel_url: new_order_payment_url(@order),
     )
     @stripe_publishable_key = Rails.configuration.stripe[:publishable_key]
-    @session_id = stripe_session.id
+    @order.update(stripe_session_id: stripe_session.id)
   end
+
 private
 
   def set_order
     @order = current_user.orders.where(state: 'pending').find(params[:order_id])
   end
+
 end
 
 ```
 
-## Step 5 - Payment Form
+## Step 7 - Payment Form
 ```html
-<h1>Purchase of product <%= @order.product_sku %></h1>
-  <article>
-    <label class="amount">
-      <span>Amount: <%= humanized_money_with_symbol(@order.amount) %></span>
-    </label>
-  </article>
-  <button id="checkout-button"
-          data-sessionid="<%= @session_id %>"
-          data-stripekey="<%= @stripe_publishable_key %>">
-    Pay
-  </button>
+<div class="container text-center">
+  <h1>Purchase of product <%= @order.teddy_sku %></h1>
+    <article>
+      <label class="amount">
+        <span>Amount: <%= humanized_money_with_symbol(@order.amount) %></span>
+      </label>
+    </article>
+    <button id="checkout-button"
+            class="btn btn-primary"
+            data-sessionid="<%= @order.stripe_session_id %>"
+            data-stripekey="<%= @stripe_publishable_key %>">
+      Pay
+    </button>
+</div>
 ```
 
 
-## Step 6 - Stripe JS
+## Step 8 - Stripe JS
 ```javascript
+function flash(innerHTML) {
+  const flash = document.getElementById('flash');
+  flash.innerHTML = innerHTML;
+};
+
 var checkoutButton = document.querySelector('#checkout-button');
 if (checkoutButton) {
   checkoutButton.addEventListener('click', function (event) {
@@ -90,47 +122,32 @@ if (checkoutButton) {
     stripe.redirectToCheckout({
       sessionId: event.currentTarget.dataset.sessionid
     }).then(function (result) {
-      // If `redirectToCheckout` fails due to a browser or network
-      // error, display the localized error message to your customer
-      // using `result.error.message`.
-      result.error.message
+      flash('<%= j render "shared/flashes", alert: "Une erreur s est produite lors du paiement : " + result.error.message %>');
     });
   });
 }
 ```
 
-## Step 7 - Order Controller
+## Step 9 - Order Controller
 ```ruby
 class OrdersController < ApplicationController
-
-  def create
-    product = Product.find(params[:product_id])
-    order  = Order.create!(product_sku: product.sku, amount: product.price, state: 'pending', user: current_user)
-    redirect_to new_order_payment_path(order)
+  def paid
+    @order = current_user.orders.find(params[:id])
+    @order.update(state: 'paid')
+    redirect_to @order
   end
+
   def show
     @order = current_user.orders.find(params[:id])
-    @order.update(payment: 'done', state: 'paid')
-    flash[:notice] = "Paiement validé avec succés"
+    flash[:notice] = "Paiement validé avec succès"
+  end
+
+  def create
+  teddy = Teddy.find(params[:teddy_id])
+  order  = Order.create!(teddy_sku: teddy.sku, amount: teddy.price, state: 'pending', user: current_user)
+  redirect_to new_order_payment_path(order)
   end
 end
-```
-
-## Step 8 - Obtain the error message
-```javascript
-function flash(innerHTML) {
-  const flash = document.getElementById('flash');
-  flash.innerHTML = innerHTML;
-};
-...
-}).then(function (result) {
-  if (result.error.message) {
-    // var displayError = document.getElementById('error-message');
-    // displayError.textContent = result.error.message;
-    flash('<%= j render "shared/flashes", alert: "Une erreur s est produite lors du paiement : " + result.error.message %>');
-  }
-});
-...
 ```
 
 ## Additional infos - in case
